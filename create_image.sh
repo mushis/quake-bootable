@@ -59,7 +59,7 @@ tintrc="$currentdir/resources/tint2rc"
 modprobe="$currentdir/resources/modprobe.d"
 issueappend="$currentdir/resources/issue.append"
 
-packages="file git sudo build-essential libgl1-mesa-dri libpcre3-dev terminfo iproute2 procps vim-tiny unzip zstd alsa-utils grub2 connman cpufrequtils fbset chrony lvm2 gdisk initramfs-tools fdisk intel-microcode amd64-microcode firmware-linux firmware-linux-nonfree firmware-linux-free libarchive-tools linux-image-amd64 "
+packages="file git sudo build-essential libgl1-mesa-dri libpcre3-dev terminfo iproute2 procps vim-tiny unzip zstd alsa-utils grub2 connman cpufrequtils fbset chrony lvm2 gdisk initramfs-tools fdisk intel-microcode amd64-microcode firmware-linux firmware-linux-nonfree firmware-linux-free libarchive-tools linux-xanmod-x64v1 "
 packages_x11=" xserver-xorg-legacy xserver-xorg-core xserver-xorg-video-amdgpu xserver-xorg-input-all xinit connman-gtk feh xterm obconf openbox tint2 fbautostart menu python3-xdg xdg-utils lxrandr dex chromium pasystray pavucontrol pipewire pipewire-pulse wireplumber rtkit dex x11-xserver-utils dbus-x11 dbus-bin imagemagick pcmanfm gvfs-backends"
 
 if [ "$minimal_kmsdrm" != "1" ];then
@@ -145,12 +145,12 @@ if [ $onlybuild -eq 0 ] || [ ! -d "$workdir/usr" ];then
 	sed -i "s/main$/main contrib non-free non-free-firmware/g" /etc/apt/sources.list
 
 	##xanmod
-	#echo "deb http://deb.xanmod.org releases main" > /etc/apt/sources.list.d/xanmod.list
-	#gpg --keyserver keyserver.ubuntu.com --recv-keys 86F7D09EE734E623 || \
-	#	gpg --keyserver pgp.mit.edu --recv-keys 86F7D09EE734E623 
-	#gpg --output - --export --armor > /tmp/xanmod.gpg
-	#APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key --keyring /etc/apt/trusted.gpg.d/xanmod-kernel.gpg add /tmp/xanmod.gpg
-	#rm -f /tmp/xanmod.gpg
+	echo "deb http://deb.xanmod.org releases main" > /etc/apt/sources.list.d/xanmod.list
+	gpg --keyserver keyserver.ubuntu.com --recv-keys 86F7D09EE734E623 || \
+		gpg --keyserver pgp.mit.edu --recv-keys 86F7D09EE734E623 
+	gpg --output - --export --armor > /tmp/xanmod.gpg
+	APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key --keyring /etc/apt/trusted.gpg.d/xanmod-kernel.gpg add /tmp/xanmod.gpg
+	rm -f /tmp/xanmod.gpg
 
 	apt-get -qy update
 	(mount -t devpts devpts /dev/pts||true)
@@ -241,8 +241,8 @@ if [ $onlybuild -eq 0 ] || [ ! -d "$workdir/usr" ];then
 	  apt-get -qy install $ezquakedeps
 	fi
 
-	#openrazer and kernel headers	
-	apt-get -qy install openrazer-driver-dkms linux-headers-amd64
+	#openrazer
+	apt-get -qy install openrazer-driver-dkms
 
 	if [ "$minimal_kmsdrm" != "1" ];then
 		#install afterquake
@@ -353,7 +353,7 @@ export LVM_SYSTEM_DIR=$lvmdir
 #sudo pvs 2>/dev/null|grep --color=never 'mapper/loop'|awk '{print $1}'|xargs -r sudo pvremove -f
 #sudo losetup|grep --color=never 'tmp.dbstck'|awk '{print $1}'|xargs -r sudo kpartx -d 
 
-sudo -E ./debootstick/debootstick --config-kernel-bootargs "+pcie_aspm=off +processor.max_cstate=1 +audit=0 +apparmor=0 +preempt=full +mitigations=off +tsc=reliable -quiet +nosplash" --config-root-password-none --config-hostname $mediahostname "$workdir" "$imagename" 2>/tmp/quake_bootable.err 
+sudo -E ./debootstick/debootstick --kernel-package "linux-xanmod" --config-kernel-bootargs "+pcie_aspm=off +processor.max_cstate=1 +audit=0 +apparmor=0 +preempt=full +mitigations=off +tsc=reliable -quiet +nosplash" --config-root-password-none --config-hostname $mediahostname "$workdir" "$imagename" 2>/tmp/quake_bootable.err 
 
 if [ $? -eq 0 ];then
 	echo "compressing..." && \
